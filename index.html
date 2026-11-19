@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#c9f3f5" />
+  <title>Frostbound — Ice Run</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="game-shell" id="gameShell">
+    <canvas id="gameCanvas" aria-label="Ice skating obstacle course game"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Frostbound home"><span class="brand-mark">✳</span><span>FROST<span class="brand-light">BOUND</span></span></a>
+      <div class="top-note"><span class="live-dot"></span> FROZEN LAKE CHALLENGE</div>
+      <button class="sound-button" id="soundButton" aria-label="Toggle sound" title="Toggle sound"><span id="soundIcon">♫</span></button>
+    </header>
+
+    <section class="race-hud" id="raceHud" aria-live="polite">
+      <div class="hud-card distance-card">
+        <span class="hud-label">DISTANCE</span>
+        <div class="distance-value"><strong id="distanceReadout">0.0</strong><span>km</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div><span class="progress-pin"></span></div>
+        <div class="progress-labels"><span>START</span><span>FINISH</span></div>
+      </div>
+      <div class="hud-card record-card">
+        <span class="hud-label">BEST RUN</span>
+        <strong id="bestReadout">—</strong>
+        <span class="record-caption">personal best</span>
+      </div>
+      <div class="lives" id="lives" aria-label="Three chances remaining"><span>♥</span><span>♥</span><span>♥</span></div>
+    </section>
+
+    <div class="course-callout" id="courseCallout"><span class="callout-spark">✦</span><span id="calloutText">CLEAR ICE AHEAD</span></div>
+
+    <section class="center-panel intro-panel" id="introPanel">
+      <div class="eyebrow"><span></span> THE FROSTBOUND CUP <span></span></div>
+      <h1>Chase the<br><em>finish line.</em></h1>
+      <p>One frozen lake. A few flying leaps.<br>Can you make it to the other side?</p>
+      <button class="primary-button" id="startButton">LACE UP <span>→</span></button>
+      <div class="control-hint"><kbd>SPACE</kbd><span>or</span><kbd>↑</kbd><span>to jump</span><span class="hint-divider">·</span><span>avoid every obstacle</span></div>
+    </section>
+
+    <section class="center-panel result-panel hidden" id="resultPanel">
+      <div class="eyebrow" id="resultEyebrow"><span></span> RACE COMPLETE <span></span></div>
+      <h2 id="resultTitle">You made it!</h2>
+      <p id="resultMessage">The lake is yours.</p>
+      <button class="primary-button" id="againButton">SKATE AGAIN <span>↻</span></button>
+    </section>
+
+    <div class="jump-hint" id="jumpHint"><span class="hint-ring">↑</span><span>JUMP</span></div>
+    <button class="jump-button" id="jumpButton" aria-label="Jump"><span>↑</span><small>JUMP</small></button>
+    <footer class="bottom-note"><span class="wind-icon">〰</span> LAKE FROST · EST. 1986 <span class="footer-dot">✳</span> PERFECT ICE, PERFECT DAY</footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
