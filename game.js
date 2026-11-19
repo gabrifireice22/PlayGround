@@ -116,20 +116,38 @@
     ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-20+legSwing,-12);ctx.lineTo(-8+legSwing,-12);ctx.moveTo(9-legSwing,-12);ctx.lineTo(21-legSwing,-12);ctx.stroke();
     // legs + trousers
     ctx.strokeStyle='#315f78';ctx.lineWidth=9;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-5,-27);ctx.lineTo(-10+legSwing,-7);ctx.moveTo(5,-27);ctx.lineTo(11-legSwing,-7);ctx.stroke();
-    // jacket body, slight lean
-    ctx.fillStyle='#f47b68';ctx.beginPath();ctx.moveTo(-14,-63);ctx.quadraticCurveTo(-18,-47,-11,-30);ctx.lineTo(11,-30);ctx.quadraticCurveTo(18,-48,13,-63);ctx.quadraticCurveTo(0,-72,-14,-63);ctx.fill();
-    ctx.fillStyle='#fca18a';ctx.beginPath();ctx.moveTo(-11,-60);ctx.quadraticCurveTo(0,-54,12,-60);ctx.lineTo(10,-48);ctx.quadraticCurveTo(0,-44,-10,-49);ctx.fill();
+    // jacket body, slight lean — navy and coral sports top inspired by the reference
+    ctx.fillStyle='#263c62';ctx.beginPath();ctx.moveTo(-14,-63);ctx.quadraticCurveTo(-18,-47,-11,-30);ctx.lineTo(11,-30);ctx.quadraticCurveTo(18,-48,13,-63);ctx.quadraticCurveTo(0,-72,-14,-63);ctx.fill();
+    ctx.fillStyle='#ef6681';ctx.beginPath();ctx.moveTo(-14,-51);ctx.quadraticCurveTo(0,-45,14,-51);ctx.lineTo(13,-44);ctx.quadraticCurveTo(0,-38,-13,-44);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#ef6681';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-11,-60);ctx.quadraticCurveTo(0,-55,11,-60);ctx.stroke();
     // arms
     ctx.strokeStyle='#f47b68';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-12,-58);ctx.lineTo(-23,-44+Math.sin(t*.013)*2);ctx.lineTo(-28,-37);ctx.moveTo(12,-58);ctx.lineTo(23,-47);ctx.lineTo(28,-43+Math.cos(t*.012)*2);ctx.stroke();
     ctx.fillStyle='#efb493';ctx.beginPath();ctx.arc(-28,-36,4,0,Math.PI*2);ctx.arc(28,-42,4,0,Math.PI*2);ctx.fill();
     // scarf flying in the wind
     ctx.fillStyle='#f9c66e';polygon([[-7,-61],[9,-61],[15,-57],[7,-54],[-5,-57]]);polygon([[9,-57],[21,-52],[16,-50],[9,-52]]);
-    // head and hat
-    ctx.fillStyle='#eab18f';ctx.beginPath();ctx.arc(0,-75,12,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#315b73';ctx.beginPath();ctx.arc(0,-80,12,Math.PI,Math.PI*2);ctx.lineTo(12,-77);ctx.quadraticCurveTo(0,-72,-12,-77);ctx.fill();
-    ctx.fillStyle='#f5fbef';ctx.beginPath();ctx.arc(0,-91,3,0,Math.PI*2);ctx.fill();
-    // cheeks and face profile
-    ctx.fillStyle='#ce806d';ctx.beginPath();ctx.arc(8,-74,2,0,Math.PI*2);ctx.fill();
+    // portrait of the main character: warm skin, dark ponytail, freckles and bright smile
+    ctx.fillStyle='#4a3027';
+    ctx.beginPath();ctx.ellipse(-11,-78,7,13,-.25,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(12,-77,6,14,.35,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#33231f';
+    ctx.beginPath();ctx.moveTo(-13,-86);ctx.quadraticCurveTo(-3,-96,11,-86);ctx.lineTo(13,-78);ctx.quadraticCurveTo(1,-86,-14,-78);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#33231f';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(10,-82);ctx.quadraticCurveTo(19,-78,20,-68);ctx.stroke();
+    ctx.fillStyle='#c98b6d';ctx.beginPath();ctx.ellipse(0,-75,13,15,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#b87960';ctx.beginPath();ctx.ellipse(0,-75,11,13,0,0,Math.PI*2);ctx.fill();
+    // hairline and parted fringe
+    ctx.fillStyle='#33231f';ctx.beginPath();ctx.moveTo(-12,-79);ctx.quadraticCurveTo(-7,-91,5,-89);ctx.quadraticCurveTo(12,-87,12,-80);ctx.quadraticCurveTo(5,-84,-1,-79);ctx.quadraticCurveTo(-6,-84,-12,-79);ctx.fill();
+    // expressive dark eyes
+    ctx.fillStyle='#2f4d70';ctx.beginPath();ctx.ellipse(-5,-77,2.1,2.5,0,0,Math.PI*2);ctx.ellipse(6,-77,2.1,2.5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-5.5,-77.7,.7,0,Math.PI*2);ctx.arc(5.5,-77.7,.7,0,Math.PI*2);ctx.fill();
+    // eyebrows and nose
+    ctx.strokeStyle='#493129';ctx.lineWidth=1.2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-8,-82);ctx.quadraticCurveTo(-5,-84,-2,-82);ctx.moveTo(3,-82);ctx.quadraticCurveTo(6,-84,9,-82);ctx.stroke();
+    ctx.fillStyle='#9e684f';ctx.beginPath();ctx.moveTo(0,-75);ctx.lineTo(-1.5,-72);ctx.lineTo(1,-72);ctx.closePath();ctx.fill();
+    // smiling mouth and little teeth
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(-7,-68);ctx.quadraticCurveTo(1,-64,8,-68);ctx.quadraticCurveTo(1,-71,-7,-68);ctx.fill();
+    ctx.fillStyle='#9d5360';ctx.beginPath();ctx.moveTo(-7,-68);ctx.quadraticCurveTo(1,-61,8,-68);ctx.quadraticCurveTo(1,-64,-7,-68);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(-5,-68);ctx.quadraticCurveTo(0,-66,5,-68);ctx.lineTo(4,-70);ctx.quadraticCurveTo(0,-69,-4,-70);ctx.closePath();ctx.fill();
+    // coral earrings
+    ctx.fillStyle='#ef6681';ctx.beginPath();ctx.arc(-13,-69,2.3,0,Math.PI*2);ctx.arc(13,-69,2.3,0,Math.PI*2);ctx.fill();
     ctx.restore();
     // snow sparkle trail
     if(state==='playing' && Math.random()<.45) particles.push({x:x+(Math.random()-.5)*36,y:baseY+Math.random()*3,r:Math.random()*1.8+.6,v:-1.6});
