@@ -43,7 +43,7 @@
       <h1>Chase the<br><em>finish line.</em></h1>
       <p>One frozen lake. A few flying leaps.<br>Can you make it to the other side?</p>
       <button class="primary-button" id="startButton">LACE UP <span>→</span></button>
-      <div class="control-hint"><kbd>SPACE</kbd><span>or</span><kbd>↑</kbd><span>to jump</span><span class="hint-divider">·</span><span>avoid every obstacle</span></div>
+      <div class="control-hint"><kbd>←</kbd><kbd>→</kbd><span>to move</span><span class="hint-divider">·</span><kbd>SPACE</kbd><span>to jump</span></div>
     </section>
 
     <section class="center-panel result-panel hidden" id="resultPanel">
@@ -53,6 +53,10 @@
       <button class="primary-button" id="againButton">SKATE AGAIN <span>↻</span></button>
     </section>
 
+    <div class="move-controls" aria-label="Movement controls">
+      <button class="move-button move-left" id="leftButton" aria-label="Move left">←</button>
+      <button class="move-button move-right" id="rightButton" aria-label="Move right">→</button>
+    </div>
     <div class="jump-hint" id="jumpHint"><span class="hint-ring">↑</span><span>JUMP</span></div>
     <button class="jump-button" id="jumpButton" aria-label="Jump"><span>↑</span><small>JUMP</small></button>
     <footer class="bottom-note"><span class="wind-icon">〰</span> LAKE FROST · EST. 1986 <span class="footer-dot">✳</span> PERFECT ICE, PERFECT DAY</footer>

@@ -4,6 +4,7 @@
   const $ = (id) => document.getElementById(id);
   const introPanel = $('introPanel'), resultPanel = $('resultPanel');
   const raceHud = $('raceHud'), jumpButton = $('jumpButton'), jumpHint = $('jumpHint');
+  const moveControls = document.querySelector('.move-controls'), leftButton = $('leftButton'), rightButton = $('rightButton');
   const TOTAL = 1000;
   const obstacles = [
     { at: 78, type: 'snow', lane: -.5 }, { at: 157, type: 'cone', lane: .55 },
@@ -17,6 +18,11 @@
   let lastTime = 0, jumpTime = 0, hurtTime = 0, soundOn = true, audioCtx = null;
   let best = Number(localStorage.getItem('frostboundBest') || 0);
   let particles = [];
+  // Player lane: -1 is left, 0 is center, 1 is right.
+  let playerLane = 0;
+  let laneVelocity = 0;
+  let keys = {};
+  const laneLimits = 0.72;
   $('bestReadout').textContent = best ? `${best} m` : '—';
 
   function resize() {
@@ -107,7 +113,7 @@
     const jumping=jumpTime>0, jumpProgress=jumping?1-jumpTime/.82:0;
     const lift=jumping?Math.sin(jumpProgress*Math.PI)*Math.min(H*.19,125):0;
     const wobble=state==='playing'?Math.sin(t*.012)*2:0;
-    ctx.save();ctx.translate(x+wobble,baseY-lift);
+    ctx.save();ctx.translate(x+wobble + playerLane*W*.19,baseY-lift);
     // soft shadow
     ctx.fillStyle=`rgba(32,83,102,${jumping?.11:.18})`;ctx.beginPath();ctx.ellipse(0,8+lift*.1,27+lift*.08,6,0,0,Math.PI*2);ctx.fill();
     const legSwing=state==='playing'&&!jumping?Math.sin(t*.018)*8:0;
@@ -201,8 +207,8 @@
   function updateLives(){const hearts=$('lives').children;for(let i=0;i<3;i++)hearts[i].classList.toggle('lost',i>=lives);$('lives').setAttribute('aria-label',`${lives} chances remaining`);}
   function showCallout(text){$('calloutText').textContent=text;$('courseCallout').classList.add('show');clearTimeout(showCallout.timer);showCallout.timer=setTimeout(()=>$('courseCallout').classList.remove('show'),1050);}
   function beep(freq,duration=0.1,type='sine') {if(!soundOn)return;try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();osc.type=type;osc.frequency.value=freq;gain.gain.setValueAtTime(.055,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration);}catch(e){}}
-  function startGame(){distance=0;lives=3;jumpTime=0;hurtTime=0;obstacles.forEach(o=>o.hit=false);lastTime=performance.now();state='playing';updateLives();introPanel.classList.add('hidden');resultPanel.classList.add('hidden');raceHud.classList.add('active');jumpButton.classList.add('active');jumpHint.classList.add('visible');showCallout('CLEAR ICE AHEAD');}
-  function finish(win){state=win?'won':'lost';jumpButton.classList.remove('active');jumpHint.classList.remove('visible');raceHud.classList.remove('active');resultPanel.classList.remove('hidden');
+  function startGame(){distance=0;lives=3;jumpTime=0;hurtTime=0;playerLane=0;laneVelocity=0;obstacles.forEach(o=>o.hit=false);lastTime=performance.now();state='playing';updateLives();introPanel.classList.add('hidden');resultPanel.classList.add('hidden');raceHud.classList.add('active');jumpButton.classList.add('active');jumpHint.classList.add('visible');moveControls.classList.add('active');showCallout('CLEAR ICE AHEAD');}
+  function finish(win){state=win?'won':'lost';jumpButton.classList.remove('active');jumpHint.classList.remove('visible');moveControls.classList.remove('active');raceHud.classList.remove('active');resultPanel.classList.remove('hidden');
     $('resultEyebrow').innerHTML=win?'<span></span> RACE COMPLETE <span></span>':'<span></span> BACK ON YOUR FEET <span></span>';
     $('resultTitle').textContent=win?'You made it!':'A slippery finish.';
     $('resultMessage').textContent=win?'The whole frozen lake is yours. Beautifully skated.':'The ice won this round. Take a breath and try again.';
@@ -211,15 +217,32 @@
   }
   function jump(){if(state!=='playing'||jumpTime>0)return;jumpTime=.82;beep(460,.11,'triangle');}
   $('startButton').addEventListener('click',startGame);$('againButton').addEventListener('click',startGame);jumpButton.addEventListener('pointerdown',e=>{e.preventDefault();jump();});
-  window.addEventListener('keydown',e=>{if(['Space','ArrowUp','KeyW'].includes(e.code)){e.preventDefault();if(state==='intro'||state==='won'||state==='lost')startGame();else jump();}if(e.code==='Escape'&&state==='playing')finish(false);});
+  function bindMoveButton(button, code) {
+    const press=e=>{e.preventPrevent;e.preventDefault();keys[code]=true;};
+    const release=e=>{e.preventDefault();keys[code]=false;};
+    button.addEventListener('pointerdown',press);
+    button.addEventListener('pointerup',release);
+    button.addEventListener('pointercancel',release);
+    button.addEventListener('pointerleave',release);
+  }
+  bindMoveButton(leftButton,'ArrowLeft');
+  bindMoveButton(rightButton,'ArrowRight');
+  window.addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','KeyW','ArrowLeft','ArrowRight','KeyA','KeyD'].includes(e.code))e.preventDefault();if(['Space','ArrowUp','KeyW'].includes(e.code)){if(state==='intro'||state==='won'||state==='lost')startGame();else jump();}if(e.code==='Escape'&&state==='playing')finish(false);},{passive:false});
+  window.addEventListener('keyup',e=>{keys[e.code]=false;});
+  window.addEventListener('blur',()=>{keys={};});
   $('soundButton').addEventListener('click',()=>{soundOn=!soundOn;$('soundIcon').textContent=soundOn?'♫':'♪̸';$('soundButton').setAttribute('aria-label',soundOn?'Toggle sound':'Turn sound on');if(soundOn)beep(620,.08);});
   let previous=performance.now();
   function tick(now){const dt=Math.min(.05,(now-previous)/1000);previous=now;
     if(state==='playing'){
       distance+=dt*25.5;
+      const movingLeft=keys.ArrowLeft||keys.KeyA;
+      const movingRight=keys.ArrowRight||keys.KeyD;
+      laneVelocity += ((movingRight?laneLimits:0)-(movingLeft?laneLimits:0)-playerLane)*dt*8;
+      laneVelocity *= Math.pow(.008,dt);
+      playerLane=Math.max(-laneLimits,Math.min(laneLimits,playerLane+laneVelocity*dt*7));
       if(jumpTime>0)jumpTime=Math.max(0,jumpTime-dt);
       if(hurtTime>0)hurtTime=Math.max(0,hurtTime-dt);
-      for(const o of obstacles){if(!o.hit&&Math.abs(o.at-distance)<8.7){o.hit=true;if(jumpTime<=0&&hurtTime<=0){lives--;hurtTime=1.3;updateLives();showCallout('OOPS! KEEP SKATING');beep(155,.25,'sawtooth');if(lives<=0){finish(false);break;}}else if(jumpTime>0){showCallout('NICE JUMP!');beep(620,.08,'triangle');}}}
+      for(const o of obstacles){if(!o.hit&&Math.abs(o.at-distance)<8.7){const closeLane=Math.abs(o.lane-playerLane)<.34;o.hit=true;if(closeLane&&jumpTime<=0&&hurtTime<=0){lives--;hurtTime=1.3;updateLives();showCallout('OOPS! MOVE LEFT OR RIGHT');beep(155,.25,'sawtooth');if(lives<=0){finish(false);break;}}else if(closeLane&&jumpTime>0){showCallout('NICE JUMP!');beep(620,.08,'triangle');}else if(!closeLane){showCallout('CLEAN AVOID!');beep(620,.06,'triangle');}}}
       if(distance>=TOTAL)finish(true);
     } else if(state==='intro') { // reset obstacle flags on a fresh page / idle scene
       obstacles.forEach(o=>o.hit=false);
