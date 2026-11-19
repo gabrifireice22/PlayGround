@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#ff5827" />
+  <title>Motricce Rush</title>
+  <style>
+    :root { --ink:#20180f; --cream:#fff4d6; --orange:#ff6230; --red:#ee3f28; --yellow:#ffc83d; --green:#65b84b; }
+    * { box-sizing:border-box; }
+    html,body { width:100%; height:100%; margin:0; overflow:hidden; }
+    body { font-family:"Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif; background:#2a170b; color:var(--ink); touch-action:none; user-select:none; }
+    button { font:inherit; }
+    #game { position:relative; width:100%; height:100%; min-height:520px; overflow:hidden; background:linear-gradient(180deg,#87cbe7 0 24%,#f6c96a 24% 43%,#ffcf87 43% 100%); }
+    #game:before { content:""; position:absolute; inset:0 0 57%; background:radial-gradient(circle at 76% 28%,#fff 0 5%,transparent 5.5%), linear-gradient(160deg,transparent 65%,rgba(255,255,255,.18) 65%); }
+    .window { position:absolute; left:2.5%; top:8%; width:31%; height:36%; border:clamp(5px,1vw,10px) solid #fff3cf; border-radius:5px; overflow:hidden; background:linear-gradient(#8fd9ed 0 70%,#65a84c 70%); box-shadow:0 8px 0 rgba(67,45,22,.12); }
+    .window:before { content:""; position:absolute; width:100%; height:8%; bottom:28%; background:rgba(255,255,255,.25); }
+    .city { position:absolute; left:0; right:0; bottom:18%; height:27%; background:linear-gradient(90deg,#b8c18d 0 9%,transparent 9% 12%,#9ec8b0 12% 20%,transparent 20% 24%,#aab57b 24% 34%,transparent 34% 38%,#91bda3 38% 48%,transparent 48% 52%,#bdc58d 52% 63%,transparent 63% 67%,#9dc39e 67% 78%,transparent 78% 82%,#b7bb7e 82% 92%,transparent 92%); clip-path:polygon(0 44%,8% 44%,8% 18%,15% 18%,15% 54%,24% 54%,24% 30%,32% 30%,32% 58%,43% 58%,43% 12%,51% 12%,51% 48%,61% 48%,61% 24%,71% 24%,71% 53%,81% 53%,81% 32%,90% 32%,90% 48%,100% 48%,100% 100%,0 100%); }
+    #road { position:absolute; left:-10%; bottom:-12%; width:120%; height:73%; background:linear-gradient(180deg,#ddaa62 0,#d49b55 100%); clip-path:polygon(31% 0,69% 0,100% 100%,0 100%); }
+    #road:before { content:""; position:absolute; left:49.6%; top:0; width:2.2%; height:100%; background:repeating-linear-gradient(180deg,transparent 0 7%,rgba(255,244,194,.75) 7% 13%); transform:skewX(-3deg); }
+    .counter { position:absolute; z-index:3; left:-2%; right:-2%; bottom:0; height:29%; background:linear-gradient(180deg,#a94d2f 0 14%,#c76e40 14% 58%,#7a3627 58% 62%,#f1a654 62% 100%); border-top:8px solid #793a2a; box-shadow:0 -10px 30px rgba(75,38,20,.15); }
+    .counter:before { content:""; position:absolute; left:0; right:0; top:14%; height:44%; background:linear-gradient(135deg,transparent 0 48%,rgba(255,213,137,.18) 48% 52%,transparent 52%) 0 0/28px 28px; }
+    #hud { position:absolute; z-index:20; left:0; right:0; top:0; height:84px; display:flex; align-items:flex-start; justify-content:space-between; padding:max(10px,env(safe-area-inset-top)) 16px 0; pointer-events:none; }
+    .brand { height:58px; min-width:154px; padding:8px 14px 7px; border-radius:16px 16px 16px 4px; background:#fff6d8; border:3px solid #f0a84c; box-shadow:0 5px 0 #be5630,0 9px 18px rgba(74,39,18,.14); transform:rotate(-1deg); }
+    .brand strong { display:block; color:#ea4828; font-size:25px; line-height:20px; letter-spacing:-1px; }
+    .brand span { color:#6e4a31; font-size:10px; letter-spacing:2.5px; }
+    .stats { display:flex; gap:8px; }
+    .stat { min-width:82px; height:58px; border-radius:14px; background:#fff8e6; border:3px solid #f0a84c; box-shadow:0 5px 0 #be5630; text-align:center; padding:5px 8px; }
+    .stat label { display:block; font-size:9px; letter-spacing:1.2px; color:#8b6246; }
+    .stat b { display:block; color:#2a1c12; font-size:22px; line-height:24px; }
+    #progress { position:absolute; z-index:19; left:50%; top:78px; width:min(360px,46%); height:12px; transform:translateX(-50%); border:3px solid #783c2a; border-radius:12px; background:#fff0bd; overflow:hidden; box-shadow:0 3px 0 rgba(88,48,27,.12); }
+    #progressFill { width:0%; height:100%; background:linear-gradient(90deg,#6ac34e,#ffc83d); transition:width .25s; }
+    #orders { position:absolute; z-index:15; left:50%; top:106px; width:min(760px,86%); height:118px; transform:translateX(-50%); display:flex; justify-content:center; gap:10px; }
+    .order { position:relative; width:128px; height:112px; flex:0 1 128px; border:4px solid #73392a; border-radius:16px 16px 12px 12px; background:#fff8df; box-shadow:0 7px 0 rgba(106,55,35,.22); text-align:center; padding:6px 5px 4px; transition:.2s; }
+    .order.urgent { animation:pulse .65s infinite alternate; border-color:#ef432d; }
+    @keyframes pulse { to { transform:translateY(-4px) scale(1.03); } }
+    .order.completed { animation:pop .35s ease forwards; }
+    @keyframes pop { 50% { transform:scale(1.12) rotate(3deg); } 100% { transform:scale(.2) translateY(-60px); opacity:0; } }
+    .order .emoji { display:block; height:57px; line-height:57px; font-size:46px; filter:drop-shadow(0 3px 0 rgba(103,65,35,.12)); }
+    .order .name { display:block; height:17px; font-size:11px; font-weight:900; text-transform:uppercase; }
+    .timer { height:7px; margin:4px 8px 0; border-radius:8px; background:#e7cf9d; overflow:hidden; }
+    .timer i { display:block; height:100%; width:100%; background:#ef5a35; }
+    #tray { position:absolute; z-index:14; left:50%; bottom:21.5%; width:min(600px,80%); height:112px; transform:translateX(-50%); display:flex; align-items:flex-end; justify-content:center; gap:10px; }
+    .food { position:relative; width:90px; height:88px; border:0; border-radius:50%; background:transparent; cursor:pointer; filter:drop-shadow(0 8px 4px rgba(77,43,24,.18)); transition:transform .12s; padding:0; -webkit-tap-highlight-color:transparent; }
+    .food:hover { transform:translateY(-6px) scale(1.05); }
+    .food:active { transform:scale(.86); }
+    .food .art { display:block; font-size:65px; line-height:78px; }
+    .food .key { position:absolute; right:0; bottom:2px; width:24px; height:24px; border-radius:50%; background:#fff5d8; border:2px solid #9c5937; font-size:11px; line-height:20px; font-weight:900; }
+    #combo { position:absolute; z-index:21; right:7%; bottom:31%; width:110px; text-align:center; opacity:0; transform:scale(.5) rotate(8deg); transition:.25s; }
+    #combo.show { opacity:1; transform:scale(1) rotate(-5deg); }
+    #combo b { display:block; color:#ef4028; font-size:38px; line-height:34px; text-shadow:3px 3px 0 #fff1c1,-2px -2px 0 #fff1c1; }
+    #combo span { display:block; color:#fff; font-size:13px; text-shadow:0 2px 2px #76321e; }
+    #floaters { position:absolute; z-index:25; inset:0; pointer-events:none; }
+    .floater { position:absolute; font-size:25px; font-weight:900; color:#fff; text-shadow:0 3px 0 #d34829,2px 0 0 #d34829,-2px 0 0 #d34829; animation:floatUp .7s forwards; }
+    @keyframes floatUp { to { transform:translateY(-70px) scale(.8); opacity:0; } }
+    .screen { position:absolute; z-index:100; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:linear-gradient(145deg,rgba(255,211,119,.97),rgba(255,132,65,.96)); padding:24px; }
+    .screen.hidden { display:none; }
+    .logo { font-size:clamp(48px,10vw,82px); line-height:.82; color:#fff6d5; text-transform:uppercase; letter-spacing:-5px; -webkit-text-stroke:3px #a9442b; text-shadow:0 8px 0 #dc4d2d,0 12px 24px rgba(111,52,28,.28); transform:rotate(-3deg); }
+    .logo em { display:block; color:#ffdb4d; font-size:.48em; letter-spacing:1px; -webkit-text-stroke:2px #a9442b; }
+    .subtitle { max-width:520px; margin:25px 0 18px; font-size:clamp(15px,2.2vw,20px); color:#71391f; }
+    .primary { min-width:220px; height:64px; border:0; border-radius:18px; background:#ef4c2c; color:#fff8d7; font-size:20px; font-weight:900; text-transform:uppercase; letter-spacing:1px; box-shadow:0 8px 0 #9e3827,0 14px 25px rgba(108,49,27,.22); cursor:pointer; }
+    .primary:active { transform:translateY(6px); box-shadow:0 2px 0 #9e3827; }
+    .levelgrid { display:grid; grid-template-columns:repeat(3,72px); gap:10px; margin:18px 0; }
+    .levelbtn { width:72px; height:72px; border-radius:18px; border:3px solid #b7653d; background:#fff2c4; color:#65351f; font-size:24px; font-weight:900; box-shadow:0 5px 0 #b7653d; }
+    .levelbtn.done { background:#72bd4e; color:#fff; }
+    .levelbtn.locked { filter:grayscale(.7); opacity:.55; }
+    .record { margin:10px 0 18px; color:#71391f; }
+    @media (max-height:650px) { #hud { height:66px; } .brand,.stat { height:50px; } .brand strong { font-size:21px; } #progress { top:64px; } #orders { top:84px; height:95px; } .order { height:94px; width:112px; } .order .emoji { height:44px; line-height:44px; font-size:38px; } #tray { bottom:20.5%; height:92px; } .food { height:78px; } .food .art { font-size:56px; line-height:68px; } }
+    @media (max-width:600px) { .window { width:40%; } #hud { padding-left:8px; padding-right:8px; } .brand { min-width:132px; padding-left:9px; } .brand strong { font-size:21px; } .stats { gap:5px; } .stat { min-width:64px; padding-left:4px; padding-right:4px; } .stat b { font-size:18px; } #progress { top:74px; width:44%; } #orders { top:96px; width:96%; height:105px; gap:5px; } .order { width:31%; flex-basis:31%; height:103px; } .order .emoji { height:48px; line-height:48px; font-size:39px; } .order .name { font-size:8px; } #tray { width:96%; bottom:20%; gap:2px; } .food { width:19%; height:82px; } .food .art { font-size:52px; line-height:68px; } .counter { height:27%; } #combo { right:2%; bottom:29%; } }
+  </style>
+</head>
+<body>
+<div id="game">
+  <div class="window"></div><div class="city"></div><div id="road"></div>
+  <div id="hud">
+    <div class="brand"><strong>MOTRICCE</strong><span>COMIDAS</span></div>
+    <div class="stats"><div class="stat"><label>NIVEL</label><b id="level">1</b></div><div class="stat"><label>PUNTOS</label><b id="score">0</b></div><div class="stat"><label>VIDAS</label><b id="lives">❤❤❤</b></div></div>
+  </div>
+  <div id="progress"><div id="progressFill"></div></div>
+  <div id="orders"></div>
+  <div id="tray"></div>
+  <div id="combo"><b id="comboNum">x2</b><span>COMBO</span></div>
+  <div id="floaters"></div>
+  <div class="counter"></div>
+
+  <div id="startScreen" class="screen">
+    <div class="logo">Motricce<em>Rush</em></div>
+    <p class="subtitle">Sirve los pedidos antes que termine el reloj. Cada plato correcto suma puntos y combo.</p>
+    <button id="playBtn" class="primary">A cocinar</button>
+    <div class="record" id="recordText">Mejor puntuación: 0</div>
+  </div>
+  <div id="levelScreen" class="screen hidden">
+    <div class="logo"><em>Elige nivel</em></div>
+    <div class="levelgrid" id="levelGrid"></div>
+    <button id="backBtn" class="primary" style="height:52px;min-width:180px">Volver</button>
+  </div>
+  <div id="endScreen" class="screen hidden">
+    <div class="logo" id="endTitle"><em>¡Buen servicio!</em></div>
+    <p class="subtitle" id="endText"></p>
+    <button id="nextBtn" class="primary">Siguiente nivel</button>
+  </div>
+</div>
+<script>
+const foods = [
+  {id:'pizza',name:'Pizza',emoji:'🍕',key:'1'},
+  {id:'tacos',name:'Tacos',emoji:'🌮',key:'2'},
+  {id:'risotto',name:'Risotto',emoji:'🍚',key:'3'},
+  {id:'pasta',name:'Pastas',emoji:'🍝',key:'4'},
+  {id:'milanesa',name:'Milanesa',emoji:'🥩',key:'5'},
+  {id:'burger',name:'Hamburguesa',emoji:'🍔',key:'6'}
+];
+const $=s=>document.querySelector(s);
+let level=1, score=0, lives=3, combo=0, goal=8, served=0;
+let orders=[], running=false, spawnTimer=null, tickTimer=null, unlocked=+(localStorage.motricceUnlocked||1);
+let best=+(localStorage.motricceBest||0);
+
+function renderTray(){
+  $('#tray').innerHTML=foods.map(f=>`<button class="food" data-id="${f.id}" aria-label="${f.name}"><span class="art">${f.emoji}</span><span class="key">${f.key}</span></button>`).join('');
+}
+function renderOrders(){
+  $('#orders').innerHTML=orders.map((o,i)=>`<div class="order ${o.time/o.maxTime<.28?'urgent':''}" data-index="${i}"><span class="emoji">${o.food.emoji}</span><span class="name">${o.food.name}</span><div class="timer"><i style="width:${Math.max(0,o.time/o.maxTime*100)}%"></i></div></div>`).join('');
+}
+function startLevel(n){
+  level=n; score=n===level?score:0; score=0; lives=3; combo=0; served=0;
+  goal=6+level*2; orders=[]; running=true;
+  $('#startScreen').classList.add('hidden'); $('#levelScreen').classList.add('hidden'); $('#endScreen').classList.add('hidden');
+  $('#level').textContent=level; $('#score').textContent='0'; $('#lives').textContent='❤❤❤'; $('#progressFill').style.width='0';
+  renderTray(); spawnOrder(); spawnOrder();
+  clearInterval(spawnTimer); clearInterval(tickTimer);
+  spawnTimer=setInterval(()=>{ if(running && orders.length<Math.min(3+Math.floor(level/2),5)) spawnOrder(); },Math.max(2300,5200-level*350));
+  tickTimer=setInterval(tick,100);
+}
+function spawnOrder(){
+  const pool=foods.slice(0,Math.min(4+Math.floor((level-1)/2),foods.length));
+  const food=pool[Math.floor(Math.random()*pool.length)];
+  const maxTime=Math.max(5000,10500-level*550);
+  orders.push({food,time:maxTime,maxTime}); renderOrders();
+}
+function tick(){
+  if(!running)return;
+  for(let i=orders.length-1;i>=0;i--){ orders[i].time-=100; if(orders[i].time<=0){ orders.splice(i,1); loseLife(); } }
+  renderOrders();
+}
+function loseLife(){
+  lives--; combo=0; $('#lives').textContent='❤'.repeat(lives)+'♡'.repeat(3-lives); floatText('¡Perdido!',50,'#ef4028');
+  if(lives<=0) endGame(false);
+}
+function serve(id){
+  if(!running)return;
+  const idx=orders.findIndex(o=>o.food.id===id);
+  if(idx<0){ combo=0; lives--; $('#lives').textContent='❤'.repeat(lives)+'♡'.repeat(3-lives); floatText('Pedido incorrecto',window.innerWidth*.5,'#ef4028'); if(lives<=0)endGame(false); return; }
+  const o=orders[idx]; orders.splice(idx,1);
+  combo++; served++; const fast=o.time/o.maxTime>.55?200:100; const pts=(100+fast)*combo;
+  score+=pts; $('#score').textContent=score; $('#progressFill').style.width=Math.min(100,served/goal*100)+'%';
+  if(combo>=2){ $('#comboNum').textContent='x'+combo; $('#combo').classList.add('show'); clearTimeout($('#combo').hideT); $('#combo').hideT=setTimeout(()=>$('#combo').classList.remove('show'),900); }
+  floatText('+'+pts,window.innerWidth*.5,'#fff');
+  renderOrders();
+  if(served>=goal) endGame(true);
+  else if(orders.length<3) setTimeout(spawnOrder,180);
+}
+function floatText(text,x,color){
+  const f=document.createElement('div'); f.className='floater'; f.textContent=text; f.style.left=(typeof x==='number'?x:200)+'px'; f.style.top=(window.innerHeight*.40)+'px'; f.style.color=color; $('#floaters').appendChild(f); setTimeout(()=>f.remove(),700);
+}
+function endGame(won){
+  running=false; clearInterval(spawnTimer); clearInterval(tickTimer);
+  best=Math.max(best,score); localStorage.motricceBest=best;
+  if(won){ unlocked=Math.max(unlocked,Math.min(6,level+1)); localStorage.motricceUnlocked=unlocked; }
+  $('#endTitle').innerHTML=won?'¡Nivel superado!':'<em>Servicio cerrado</em>';
+  $('#endText').textContent=won?`Completaste ${served} pedidos y lograste ${score} puntos.`:`Te quedaron pedidos sin servir. Lograste ${score} puntos.`;
+  $('#nextBtn').textContent=won?(level<6?'Siguiente nivel':'Jugar de nuevo'):'Reintentar';
+  $('#nextBtn').onclick=()=>won?(level<6?startLevel(level+1):startLevel(1)):startLevel(level);
+  $('#endScreen').classList.remove('hidden');
+}
+function showLevels(){
+  $('#levelGrid').innerHTML='';
+  for(let i=1;i<=6;i++){
+    const b=document.createElement('button'); b.className='levelbtn '+(i<unlocked?'done ':'')+(i>unlocked?'locked ':''); b.textContent=i>unlocked?'🔒':i;
+    b.onclick=()=>{if(i<=unlocked)startLevel(i)}; $('#levelGrid').appendChild(b);
+  }
+}
+$('#playBtn').onclick=()=>{ showLevels(); $('#levelScreen').classList.remove('hidden'); };
+$('#backBtn').onclick=()=>{ $('#levelScreen').classList.add('hidden'); $('#startScreen').classList.remove('hidden'); };
+$('#tray').addEventListener('click',e=>{const b=e.target.closest('.food'); if(b)serve(b.dataset.id)});
+window.addEventListener('keydown',e=>{const f=foods.find(x=>x.key===e.key); if(f)serve(f.id)});
+$('#recordText').textContent='Mejor puntuación: '+best;
+renderTray();
+</script>
+</body>
+</html>
