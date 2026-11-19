@@ -111,9 +111,32 @@
     // soft shadow
     ctx.fillStyle=`rgba(32,83,102,${jumping?.11:.18})`;ctx.beginPath();ctx.ellipse(0,8+lift*.1,27+lift*.08,6,0,0,Math.PI*2);ctx.fill();
     const legSwing=state==='playing'&&!jumping?Math.sin(t*.018)*8:0;
-    // skates behind legs
-    ctx.strokeStyle='#d8f6f2';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-8,5);ctx.lineTo(-17+legSwing,-14);ctx.moveTo(9,5);ctx.lineTo(17-legSwing,-14);ctx.stroke();
-    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-20+legSwing,-12);ctx.lineTo(-8+legSwing,-12);ctx.moveTo(9-legSwing,-12);ctx.lineTo(21-legSwing,-12);ctx.stroke();
+    // detailed figure skates: padded boots, laces, blades and metal runners
+    const leftX=-10+legSwing, rightX=11-legSwing;
+
+    function drawSkate(x, direction) {
+      ctx.save();ctx.translate(x,-7);ctx.rotate(direction*.10);
+      // ankle boot
+      ctx.fillStyle='#f7fbf7';ctx.strokeStyle='#bcd2d7';ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.moveTo(-5,-9);ctx.quadraticCurveTo(-7,-4,-6,3);ctx.quadraticCurveTo(-2,7,7,5);ctx.lineTo(9,-2);ctx.quadraticCurveTo(5,-8,3,-10);ctx.closePath();ctx.fill();ctx.stroke();
+      // padded collar and reinforced toe
+      ctx.fillStyle='#e8f1ef';ctx.beginPath();ctx.ellipse(-1,-8,6,3,-.15,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#d9e8e7';ctx.beginPath();ctx.ellipse(6,2,4,3,0,0,Math.PI*2);ctx.fill();
+      // white laces
+      ctx.strokeStyle='#fff';ctx.lineWidth=1.1;ctx.beginPath();
+      ctx.moveTo(-4,-5);ctx.lineTo(1,-3);ctx.moveTo(-3,-2);ctx.lineTo(2,0);ctx.moveTo(-2,1);ctx.lineTo(3,3);ctx.stroke();
+      ctx.fillStyle='#ef6681';ctx.beginPath();ctx.arc(-3,-5,1,0,Math.PI*2);ctx.fill();
+      // sole and blade holder
+      ctx.fillStyle='#7ca1aa';ctx.beginPath();ctx.roundRect(-8,5,17,3,1);ctx.fill();
+      ctx.fillStyle='#aee0df';ctx.beginPath();ctx.moveTo(-9,8);ctx.quadraticCurveTo(-3,6,9,8);ctx.lineTo(9,10);ctx.quadraticCurveTo(-2,10,-10,9);ctx.closePath();ctx.fill();
+      // polished steel blade
+      ctx.strokeStyle='#efffff';ctx.lineWidth=2.2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-11,10);ctx.quadraticCurveTo(-7,13,8,11);ctx.quadraticCurveTo(12,11,13,9);ctx.stroke();
+      ctx.strokeStyle='#82aabd';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(-8,11);ctx.lineTo(-5,11);ctx.moveTo(-2,12);ctx.lineTo(4,11);ctx.moveTo(7,11);ctx.lineTo(11,10);ctx.stroke();
+      ctx.restore();
+    }
+
+    drawSkate(leftX,-1);
+    drawSkate(rightX,1);
     // legs + trousers
     ctx.strokeStyle='#315f78';ctx.lineWidth=9;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-5,-27);ctx.lineTo(-10+legSwing,-7);ctx.moveTo(5,-27);ctx.lineTo(11-legSwing,-7);ctx.stroke();
     // jacket body, slight lean — navy and coral sports top inspired by the reference
