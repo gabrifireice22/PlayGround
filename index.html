@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Defensa de Lomas</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101b1f;font-family:Impact,"Arial Black",sans-serif}canvas{display:block;width:100%;height:100%;touch-action:none}.hud{position:fixed;left:50%;top:12px;transform:translateX(-50%);display:flex;gap:8px;color:white;text-shadow:2px 2px 0 #000;pointer-events:none}.pill{padding:8px 12px;border:3px solid #1d2627;border-radius:10px;background:#26383bdd;font-size:16px}.title{position:absolute;left:18px;top:14px;color:#ffd447;text-shadow:3px 3px 0 #7b4214;font-size:22px}.controls{position:fixed;bottom:12px;left:12px;right:12px;display:flex;justify-content:space-between;pointer-events:none}.stick,.action{pointer-events:auto;touch-action:none}.stick{width:135px;height:135px;border:4px solid #ffffff55;border-radius:50%;background:#ffffff18}.knob{position:absolute;width:58px;height:58px;left:38px;top:38px;border-radius:50%;background:#ffd447cc;border:3px solid #fff}.action{width:92px;height:92px;border-radius:50%;border:5px solid #fff;color:#fff;background:#d94b42dd;font:24px Impact;text-shadow:2px 2px #000}.flash{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 80px #ffb42b55}.gameover{position:fixed;inset:0;display:none;place-items:center;background:#0a1013cc}.card{text-align:center;color:white;background:#243638;border:5px solid #ffd447;border-radius:18px;padding:24px 34px;box-shadow:8px 8px 0 #111}.card h1{margin:0 0 8px;color:#ffd447;font-size:38px}.card button{font:22px Impact;border:0;border-radius:8px;background:#ffd447;padding:12px 24px;cursor:pointer}@media(max-width:700px){.title{font-size:16px}.pill{font-size:13px;padding:6px 8px}.stick{width:118px;height:118px}.knob{left:30px;top:30px}.action{width:78px;height:78px}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas><div class="title">INGENIERÍA DEL BARRIO</div>
+<div class="hud"><div class="pill" id="score">PUNTOS 0</div><div class="pill" id="wave">OLEADA 1</div><div class="pill" id="life">VIDA 100</div></div>
+<div class="controls"><div class="stick" id="stick"><div class="knob" id="knob"></div></div><button class="action" id="action">USAR</button></div><div class="flash"></div>
+<div class="gameover" id="over"><div class="card"><h1 id="overTitle">¡BARRIO PROTEGIDO!</h1><p id="overText"></p><button id="again">JUGAR DE NUEVO</button></div></div>
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');let W,H,DPR;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}addEventListener('resize',resize);resize();
+const keys={},stick={x:0,y:0,active:false};let enemies=[],bullets=[],particles=[],barriers=[],score=0,wave=1,lives=100,game=true,last=0,spawnT=0,barrierT=0,shake=0;
+const player={x:W/2,y:H/2,r:18,speed:210,angle:0,cd:0,barriers:3};
+addEventListener('keydown',e=>{keys[e.key.toLower.toLower?e.key.toLower():e.key]=true;if(e.code==='Space')placeBarrier()});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+const stickEl=document.getElementById('stick'),knob=document.getElementById('knob');function moveStick(e){let r=stickEl.getBoundingRect?stickEl.getBoundingClientRect():stickEl.getBoundingClientRect();let t=e.touches?e.touches[0]:e,x=t.clientX-r.left-r.width/2,y=t.clientY-r.top-r.height/2,d=Math.hypot(x,y)||1,m=Math.min(d,r.width*.34);stick.x=x/d*m/(r.width*.34);stick.y=y/d*m/(r.height*.34);knob.style.transform=`translate(${x/d*m}px,${y/d*m}px)`;stick.active=true;e.preventPreventDefault?.()}
+stickEl.addEventListener('pointerdown',moveStick);stickEl.addEventListener('pointermove',e=>{if(e.buttons||stick.active)moveStick(e)});stickEl.addEventListener('pointerup',()=>{stick.x=stick.y=0;stick.active=false;knob.style.transform=''});
+document.getElementById('action').addEventListener('pointerdown',e=>{e.preventDefault();placeBarrier()});document.getElementById('again').onclick=()=>location.reload();
+function placeBarrier(){if(!game||barrierT>0||player.barriers<=0)return;barriers.push({x:player.x+Math.cos(player.angle)*55,y:player.y+Math.sin(player.angle)*55,r:18,hp:4,life:9});player.barriers--;barrierT=.7}
+function spawn(){let side=Math.floor(Math.random()*4),x,y;if(side===0){x=-30;y=Math.random()*H}else if(side===1){x=W+30;y=Math.random()*H}else if(side===2){x=Math.random()*W;y=-30}else{x=Math.random()*W;y=H+30}enemies.push({x,y,r:16,hp:1+Math.floor(wave/5),speed:55+wave*5,angle:0,flash:0})}
+function shoot(){if(player.cd>0)return;player.cd=.16;bullets.push({x:player.x+Math.cos(player.angle)*24,y:player.y+Math.sin(player.angle)*24,vx:Math.cos(player.angle)*520,vy:Math.sin(player.angle)*520,r:5,life:1.2})}
+function loop(t){let dt=Math.min((t-last)/1000||0,.033);last=t;if(game){update(dt);draw()}else draw();requestAnimationFrame(loop)}
+function update(dt){if(keys.w||keys.arrowup)stick.y=-1;if(keys.s||keys.arrowdown)stick.y=1;if(keys.a||keys.arrowleft)stick.x=-1;if(keys.d||keys.arrowright)stick.x=1;if(keys[' '] )shoot();let speed=player.speed*dt;player.x=Math.max(25,Math.min(W-25,player.x+stick.x*speed));player.y=Math.max(25,Math.min(H-25,player.y+stick.y*speed));
+spawnT-=dt;if(spawnT<=0&&enemies.length<7+wave){spawn();spawnT=Math.max(.25,1.2-wave*.06)}
+for(let b of bullets){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt}bullets=bullets.filter(b=>b.life>0&&b.x>-20&&b.x<W+20&&b.y>-20&&b.y<H+20);
+for(let e of enemies){e.flash-=dt;let dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy)||1;e.angle=Math.atan2(dy,dx);e.x+=dx/d*e.speed*dt;e.y+=dy/d*e.speed*dt;if(d<e.r+player.r){lives-=18;shake=8;e.flash=.5;e.x-=dx/d*40;e.y-=dy/d*40;if(lives<=0){lives=0;end(false)}}}
+for(let b of bullets)for(let e of enemies)if(Math.hypot(b.x-e.x,b.y-e.y)<b.r+e.r){b.life=0;e.hp--;e.flash=.12;score+=25;boom(e.x,e.y,'#ffd447',4);if(e.hp<=0){e.dead=true;score+=75;boom(e.x,e.y,'#d94b42',10)}}bullets=bullets.filter(b=>b.life>0);enemies=enemies.filter(e=>!e.dead);
+for(let e of enemies)for(let br of barriers)if(Math.hypot(e.x-br.x,e.y-br.y)<e.r+br.r){let dx=e.x-br.x,dy=e.y-br.y,d=Math.hypot(dx,dy)||1;e.x=br.x+dx/d*(e.r+br.r);e.y=br.y+dy/d*(e.r+br.r);br.hp-=dt*2;if(br.hp<=0){br.dead=true;boom(br.x,br.y,'#ffd447',8)}}barriers=barriers.filter(b=>!b.dead&&b.life>0);for(let b of barriers)b.life-=dt;
+barrierT-=dt;player.cd-=dt;shake*=.85;if(score>=wave*700){wave++;player.barriers=Math.min(5,player.barriers+1);lives=Math.min(100,lives+10)}if(score>=3500)end(true);
+document.getElementById('score').textContent='PUNTOS '+score;document.getElementById('wave').textContent='OLEADA '+wave;document.getElementById('life').textContent='VIDA '+lives;}
+function boom(x,y,c,n){for(let i=0;i<n;i++){let a=Math.random()*6.28,s=Math.random()*130;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.5,c})}}function end(win){game=false;let over=document.getElementById('over');over.style.display='grid';document.getElementById('overTitle').textContent=win?'¡BARRIO PROTEGIDO!':'SE AGOTÓ LA VIDA';document.getElementById('overText').textContent=`Puntaje: ${score} · Oleada: ${wave}`}
+function draw(){ctx.save();ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);ctx.fillStyle='#d7bd82';ctx.fillRect(0,0,W,H);
+// streets
+ctx.fillStyle='#596362';ctx.fillRect(0,H*.42,W,H*.16);ctx.fillRect(W*.42,0,W*.16,H);ctx.setLineDash([24,18]);ctx.strokeStyle='#e6c95e';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,H*.50);ctx.lineTo(W,H*.50);ctx.moveTo(W*.50,0);ctx.lineTo(W*.50,H);ctx.stroke();ctx.setLineDash([]);
+// barrio houses
+ctx.fillStyle='#f2e7c8';for(let y=70;y<H;y+=170)for(let x=70;x<W;x+=210){if(x>W*.42&&x<W*.58||y>H*.42&&y<H*.58)continue;ctx.fillRect(x,y,120,70);ctx.fillStyle='#b66d3e';ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x+60,y-30);ctx.lineTo(x+125,y);ctx.fill();ctx.fillStyle='#4d9e9a';ctx.fillRect(x+18,y+20,26,24);ctx.fillRect(x+76,y+20,26,24);ctx.fillStyle='#f2e7c8'}
+for(let br of barriers){ctx.fillStyle='#ffd447';ctx.fillRect(br.x-22,br.y-8,44,16);ctx.fillStyle='#a86d26';ctx.fillRect(br.x-18,br.y-4,36,8)}
+for(let e of enemies){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.angle);ctx.fillStyle=e.flash>0?'#fff':'#3d4142';ctx.beginPath();ctx.arc(0,0,e.r,0,7);ctx.fill();ctx.fillStyle='#f2b27d';ctx.beginPath();ctx.arc(5,-6,7,0,7);ctx.fill();ctx.fillRect(-10,-3,14,6);ctx.fillStyle='#d94b42';ctx.fillRect(-12,-13,16,5);ctx.restore()}
+ctx.save();ctx.translate(player.x,player.y);ctx.rotate(player.angle);ctx.fillStyle='#2e8c83';ctx.beginPath();ctx.arc(0,0,18,0,7);ctx.fill();ctx.fillStyle='#ffd447';ctx.fillRect(-8,-22,16,8);ctx.fillStyle='#eee';ctx.fillRect(12,-5,20,10);ctx.fillStyle='#d7a36a';ctx.beginPath();ctx.arc(4,0,8,0,7);ctx.fill();ctx.restore();
+ctx.fillStyle='#ffe76b';for(let b of bullets){ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.fill()}for(let p of particles){p.x+=p.vx*(1/60);p.y+=p.vy*(1/60);p.life-=1/60;ctx.globalAlpha=Math.max(0,p.life*2);ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,5,5)}ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0);ctx.restore();
+// pointer aim uses keyboard or nearest enemy
+let ax=stick.x,ay=stick.y;if(ax||ay)player.angle=Math.atan2(ay,ax);else if(enemies.length){let n=enemies[0],bd=1e9;for(let e of enemies){let d=Math.hypot(e.x-player.x,e.y-player.y);if(d<bd){bd=d;n=e}}player.angle=Math.atan2(n.y-player.y,n.x-player.x);if(game&&bd<380)shoot()}if(game){}
+}
+addEventListener('mousemove',e=>{if(!stick.active&&game){player.angle=Math.atan2(e.clientY-player.y,e.clientX-player.x)}});addEventListener('mousedown',()=>{if(game)shoot()});requestAnimationFrame(loop);
+</script>
+</body>
+</html>
